@@ -1,0 +1,14 @@
+requests
+matplotlib
+python-dateutil
+pandas
+numpy
+tensorflow 
+flask
+flask_cors
+dash
+dash-bootstrap-components
+plotly
+fastapi 
+uvicorn 
+jinja2
