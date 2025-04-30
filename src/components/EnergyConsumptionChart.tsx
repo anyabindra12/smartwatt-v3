@@ -1,3 +1,12 @@
+// ERIKA TO-DO: this should be live-time data
+// need to access EnergyData[] from back-end
+/*
+export interface EnergyData {
+  timestamp: string;
+  value: number;
+  type: string;
+}
+*/
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";

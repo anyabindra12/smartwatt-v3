@@ -14,5 +14,5 @@ matplotlib
 joblib
 pulp
 openai
-sqlite3
 python-dotenv
+xgboost
