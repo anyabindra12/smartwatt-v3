@@ -155,7 +155,6 @@ export default function SequentialLiveChart() {
             cursor={{ stroke: "#aaa", strokeWidth: 1 }}
           />
           <Line
-            type="natural"
             dataKey="value"
             stroke="#ffd300"
             strokeWidth={3}

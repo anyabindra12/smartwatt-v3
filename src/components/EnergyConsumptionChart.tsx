@@ -77,7 +77,7 @@ export default function SequentialLiveChart() {
         parseInt(a) - parseInt(b)
       );
 
-      const selectedHours = orderedHours.slice(0, 48); // can modify to use local time
+      const selectedHours = orderedHours.slice(0, 24); // can modify to use local time
 
       const window: ChartDataPoint[] = selectedHours.map(hour => ({
         time: hour,
@@ -98,7 +98,7 @@ export default function SequentialLiveChart() {
 
   // Reveal next point in current window every 2.5s
   useEffect(() => {
-    if (rawData.length === 0 || revealIndex >= 48) return;
+    if (rawData.length === 0 || revealIndex >= 24) return;
 
     const timer = setTimeout(() => {
       setDisplayData(prev =>
@@ -119,14 +119,14 @@ export default function SequentialLiveChart() {
 
   // When one full 24-point window is revealed, shift to next window
   useEffect(() => {
-    if (revealIndex === 47) {
-      const nextStart = (windowStartIndex + 48) % rawData.length;
-      const nextWindow = rawData.slice(nextStart, nextStart + 48);
+    if (revealIndex === 24) {
+      const nextStart = (windowStartIndex + 24) % rawData.length;
+      const nextWindow = rawData.slice(nextStart, nextStart + 24);
 
       // If near the end and not enough points left, wrap around
-      while (nextWindow.length < 48) {
+      while (nextWindow.length < 24) {
         nextWindow.push(
-          ...rawData.slice(0, 48 - nextWindow.length)
+          ...rawData.slice(0, 24 - nextWindow.length)
         );
       }
 
@@ -192,7 +192,6 @@ export default function SequentialLiveChart() {
             cursor={{ stroke: "#aaa", strokeWidth: 1 }}
           />
           <Line
-            type="natural"
             dataKey="value"
             stroke="#00b894"
             strokeWidth={3}
