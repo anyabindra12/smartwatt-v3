@@ -51,7 +51,7 @@ def get_EnergyConsumptionChart():
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("smartwatt")
 
-HA_URL = "https://pi4assistant.oryx-snares.ts.net/"
+HA_URL = "https://pi4assistant.oryx-snares.ts.net/api"
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2YWZmZGYzNDdhMmI0Y2U2OGQyOGNlMDM3YmVlZDNhZCIsImlhdCI6MTc0NDQ4NzQ5MSwiZXhwIjoyMDU5ODQ3NDkxfQ.zqjmNHT_xWrYqkaMb7wEIkrvq0yDltwntayRVCSZnxc"
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
@@ -62,7 +62,6 @@ SENSORS = {
     # Fans
     "sensor.maya_bedroom_hvac_power": "Bedroom HVAC Power (W)",
     "sensor.maya_kitchen_hvac_power": "Kitchen HVAC Power (W)",
-    "sensor.maya_laundry_hvac_power": "Laundry HVAC Power (W)",
 
     # Washing
     "sensor.espee_washing_machine_power": "Washing Machine Power (W)",
@@ -82,7 +81,6 @@ DEVICES = [
     # Fans
     {"name": "ESP Bedroom HVAC", "entity": "fan.esp_bedroom_hvac"},
     {"name": "ESP Kitchen Lighting", "entity": "fan.esp_kitchen_hvac"},
-    {"name": "ESP Laundry HVAC", "entity": "fan.esp_laundry_hvac"},
 
     # Washing
     {"name": "ESP Washing Machine", "entity": "switch.espee_washing_machine"},

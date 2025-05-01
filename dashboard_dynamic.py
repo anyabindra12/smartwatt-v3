@@ -23,7 +23,7 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("smartwatt")
 
-HA_URL = "https://pi4assistant.mayasbigbox.duckdns.org/api"
+HA_URL = "https://pi4assistant.oryx-snares.ts.net/api"
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI2YWZmZGYzNDdhMmI0Y2U2OGQyOGNlMDM3YmVlZDNhZCIsImlhdCI6MTc0NDQ4NzQ5MSwiZXhwIjoyMDU5ODQ3NDkxfQ.zqjmNHT_xWrYqkaMb7wEIkrvq0yDltwntayRVCSZnxc"
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
@@ -38,17 +38,41 @@ SOLCAST_URL = f"https://api.solcast.com.au/rooftop_sites/{SOLCAST_RESOURCE_ID}/f
 SCHEDULE_FILE = "schedules.json"
 
 SENSORS = {
-    "sensor.maya_fan_power": "Fan Power (W)",
-    "sensor.maya_solar_panel": "Solar Output (W)",
-    "sensor.maya_fan_current": "Fan Current (A)",
-    "sensor.maya_fan_voltage": "Fan Voltage (V)"
+    # Fans
+    "sensor.maya_bedroom_hvac_power": "Bedroom HVAC Power (W)",
+    "sensor.maya_kitchen_hvac_power": "Kitchen HVAC Power (W)",
+
+    # Washing
+    "sensor.espee_washing_machine_power": "Washing Machine Power (W)",
+    "sensor.maya_dryer_power": "Dryer  Power (W)",
+
+    # Lighting
+    "sensor.maya_bedroom_lighting_power": "Bedroom Lighting Power (W)",
+    "sensor.maya_garage_lighting_power": "Garage Lighting Power (W)",
+    "sensor.maya_kitchen_lighting_power": "Kitchen Lighting Power (W)",
+    "sensor.maya_laundry_lighting_power": "Laundry Lighting Power (W)",
+
+    # Charger
+    "sensor.maya_ev_charger_power": "EV Charger Power (W)"
 }
 
 DEVICES = [
-    {"name": "Big LED", "entity": "switch.maya_big_led"},
-    {"name": "Small LED", "entity": "switch.maya_small_led_1"},
-    {"name": "PWM Fan", "entity": "fan.maya_pwm_fan"},
-    {"name": "Big PWM Fan", "entity": "fan.maya_big_pwm_fan"},
+    # Fans
+    {"name": "ESP Bedroom HVAC", "entity": "fan.esp_bedroom_hvac"},
+    {"name": "ESP Kitchen Lighting", "entity": "fan.esp_kitchen_hvac"},
+
+    # Washing
+    {"name": "ESP Washing Machine", "entity": "switch.espee_washing_machine"},
+    {"name": "ESP Dryer", "entity": "switch.espee_dryer"},
+
+    # Lighting
+    {"name": "ESP Bedroom Lighting", "entity": "switch.espee_bedroom_lighting"},
+    {"name": "ESP Garage Lighting", "entity": "switch.espee_garage_lighting"},
+    {"name": "ESP Kitchen Lighting", "entity": "switch.espee_kitchen_lighting"},
+    {"name": "ESP Laundry Lighting", "entity": "switch.espee_laundry_lighting"},
+
+    # Charger
+    {"name": "ESP EV Charger", "entity": "switch.espee_ev_charger"},
 ]
 
 # ── Utility Functions ──
@@ -514,7 +538,11 @@ async def dashboard():
 @app.post("/control")
 async def control_device(entity_id: str = Form(...), action: str = Form(...)):
     domain = entity_id.split(".")[0]
-    requests.post(f"{HA_URL}/services/{domain}/{action}", headers=HEADERS, json={"entity_id": entity_id})
+    post = requests.post(f"{HA_URL}/services/{domain}/{action}", 
+                  headers=HEADERS, json={"entity_id": entity_id})
+    print(f"{HA_URL}/services/{domain}/{action} - {entity_id}")
+    print(f"\"{entity_id}\"")
+    print(post)
     return RedirectResponse(url="/", status_code=303)
 
 @app.get("/optimize", response_class=HTMLResponse)
