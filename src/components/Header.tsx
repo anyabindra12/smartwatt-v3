@@ -1,4 +1,4 @@
-
+// IN USE
 import React from "react";
 import { Link } from "react-router-dom";
 import { BarChart3, Calendar, Home, PlugZap } from "lucide-react";
@@ -20,10 +20,8 @@ const Header = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-6">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full smartwatt-gradient flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SW</span>
-              </div>
-              <span className="text-xl font-bold">SmartWatt</span>
+              <img src="energy_icon.png" alt="Energy Icon" width="48" height="48"></img>
+              <h1 style={{ color: "#6c9c3b" }}>SmartWatt</h1>
             </Link>
             
             <NavigationMenu className="hidden md:flex">

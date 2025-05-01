@@ -26,15 +26,15 @@ const Analysis = () => {
           </div>
           
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid grid-cols-3 w-full max-w-3xl">
+            <TabsList className="grid grid-cols-2 w-full max-w-2xl">
               <TabsTrigger value="cost" className="flex items-center">
                 <PieChart className="mr-2 h-4 w-4" />
                 Cost Analysis
               </TabsTrigger>
-              <TabsTrigger value="optimization" className="flex items-center">
+              {/* <TabsTrigger value="optimization" className="flex items-center">
                 <LineChart className="mr-2 h-4 w-4" />
                 Optimization Reports
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="ai" className="flex items-center">
                 <BrainCircuit className="mr-2 h-4 w-4" />
                 AI Recommendations

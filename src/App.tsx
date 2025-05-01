@@ -26,11 +26,17 @@ function App() {
 
   return (
     <div>
-      <h1>Backend says: {message}</h1>
+      {/* <h1>Backend says: {message}</h1> */}
 
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} /> {/* Render Index.tsx as homepage */}
+          <Route path="/" element={<Index />} />
+          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/devices" element={<Devices />} />
+          <Route path="/analysis" element={<Analysis />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </div>

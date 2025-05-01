@@ -80,7 +80,7 @@ const DeviceSchedule = ({ device, onUpdateSchedule }: DeviceScheduleProps) => {
               <CardTitle className="flex items-center gap-2">
                 {device.name}
                 {device.isRunning && (
-                  <Badge variant="default" className="bg-energy hover:bg-energy">
+                  <Badge variant="default" className="bg-energy hover:bg-energy mr-4">
                     Running
                   </Badge>
                 )}
@@ -93,7 +93,7 @@ const DeviceSchedule = ({ device, onUpdateSchedule }: DeviceScheduleProps) => {
               <Button variant="outline" size="icon" className="h-8 w-8">
                 <Power className="h-4 w-4" />
               </Button>
-              <Button 
+              {/* <Button 
                 variant="outline" 
                 size="icon" 
                 className="h-8 w-8"
@@ -101,8 +101,8 @@ const DeviceSchedule = ({ device, onUpdateSchedule }: DeviceScheduleProps) => {
                 disabled={!currentSchedule}
               >
                 <Edit2 className="h-4 w-4" />
-              </Button>
-              {currentSchedule && (
+              </Button> */}
+              {/* {currentSchedule && (
                 <Button
                   variant="outline"
                   size="icon"
@@ -111,7 +111,7 @@ const DeviceSchedule = ({ device, onUpdateSchedule }: DeviceScheduleProps) => {
                 >
                   <BarChart className="h-4 w-4" />
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         </CardHeader>

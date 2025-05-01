@@ -7,7 +7,7 @@ import { devices as initialDevices, electricityPrices, energyConsumptionData, so
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DeviceSchedule from "./DeviceSchedule";
 import OptimizationPanel from "./OptimizationPanel";
-import ApiSetup from "./ApiSetup";
+// import ApiSetup from "./ApiSetup";
 import SavingsCard from "./SavingsCard";
 import { fetchSolarForecast } from "@/utils/apiServices";
 import { getCurrentSolarForecast, hasRealSolarData } from "@/utils/optimizationHelpers";
@@ -80,9 +80,9 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="md:col-span-2">
               <Tabs defaultValue="devices">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsList className="grid w-full grid-cols-1 mb-6">
                   <TabsTrigger value="devices">Device Schedules</TabsTrigger>
-                  <TabsTrigger value="api">API Connections</TabsTrigger>
+                  {/* <TabsTrigger value="api">API Connections</TabsTrigger> */}
                 </TabsList>
                 
                 <TabsContent value="devices">
@@ -93,11 +93,11 @@ const Dashboard = () => {
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="api">
+                {/* <TabsContent value="api">
                   <div className="grid grid-cols-1 gap-6">
                     <ApiSetup />
                   </div>
-                </TabsContent>
+                </TabsContent> */}
               </Tabs>
             </div>
             

@@ -1,110 +1,209 @@
-// ERIKA TO-DO: this should be live-time data
-// need to access EnergyData[] from back-end
-/*
-export interface EnergyData {
-  timestamp: string;
-  value: number;
-  type: string;
-}
-*/
+
+
+import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { EnergyData } from "@/mock/data";
 
-interface EnergyConsumptionChartProps {
-  data: EnergyData[];
-  title?: string;
-  description?: string;
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
+
+type RawDataPoint = {
+  time: string;
+  value: number;
+};
+
+type ChartDataPoint = {
+  time: string;
+  value: number | null;
+};
+
+export function convertTime(isoString: string): string {
+  const date = new Date(isoString);
+
+  // Convert to local hour in Eastern Time
+  const estHour = new Date(date.toLocaleString("en-US", {
+    timeZone: "America/New_York"
+  })).getHours();
+
+  return estHour.toString().padStart(2, "0") + ":00";
 }
 
-const EnergyConsumptionChart = ({ 
-  data, 
-  title = "Energy Consumption", 
-  description = "Today's energy consumption by source" 
-}: EnergyConsumptionChartProps) => {
-  // Prepare the data for the stacked area chart
-  const formattedData = data.reduce((result: any[], curr) => {
-    const existingTimeEntry = result.find(item => item.timestamp === curr.timestamp);
-    
-    if (existingTimeEntry) {
-      existingTimeEntry[curr.type] = curr.value;
-    } else {
-      const newEntry = { timestamp: curr.timestamp };
-      newEntry[curr.type] = curr.value;
-      result.push(newEntry);
-    }
-    
-    return result;
+
+export default function SequentialLiveChart() {
+  const [rawData, setRawData] = useState<RawDataPoint[]>([]);
+  const [windowStartIndex, setWindowStartIndex] = useState(0);
+  const [displayData, setDisplayData] = useState<ChartDataPoint[]>([]);
+  const [revealIndex, setRevealIndex] = useState(1);
+  const [hourlyValues, setHourlyValues] = useState<Record<string, number>>({});
+
+  // Load full JSON once
+  useEffect(() => {
+    // fetch("/solar_data.json")
+    //   .then(res => res.json())
+    //   .then((json: RawDataPoint[]) => {
+    //     setRawData(json);
+    //     const initialSlice = json.slice(0, 24);
+    //     const initialized = initialSlice.map((point, i) => ({
+    //       time: convertTime(point.time),
+    //       value: i === 0 ? point.value : null
+    //     }));
+    //     setDisplayData(initialized);
+    //     setRevealIndex(1);
+    //     setWindowStartIndex(0);
+    //   });
+    fetch("/solar_data.json")
+    .then(res => res.json())
+    .then((json: RawDataPoint[]) => {
+      // Map each item to its rounded hour
+      const groupedByHour: Record<string, number> = {};
+
+      for (const item of json) {
+        const hour = convertTime(item.time);
+        if (!(hour in groupedByHour)) {
+          groupedByHour[hour] = item.value; // Use the first value seen per hour
+        }
+      }
+
+      // Sort by hour and take 24 entries starting from 00:00 or current hour
+      const orderedHours = Object.keys(groupedByHour).sort((a, b) =>
+        parseInt(a) - parseInt(b)
+      );
+
+      const selectedHours = orderedHours.slice(0, 48); // can modify to use local time
+
+      const window: ChartDataPoint[] = selectedHours.map(hour => ({
+        time: hour,
+        value: null
+      }));
+
+      // Inject only the first value
+      window[0].value = groupedByHour[window[0].time];
+
+      setRawData(json); // keep raw data if needed
+      setDisplayData(window);
+      setRevealIndex(1);
+      setWindowStartIndex(0);
+      setHourlyValues(groupedByHour); // <-- add this state
+  });
+
   }, []);
+
+  // Reveal next point in current window every 2.5s
+  useEffect(() => {
+    if (rawData.length === 0 || revealIndex >= 48) return;
+
+    const timer = setTimeout(() => {
+      setDisplayData(prev =>
+        prev.map((point, i) =>
+          i === revealIndex
+            ? {
+                ...point,
+                value: rawData[windowStartIndex + i].value
+              }
+            : point
+        )
+      );
+      setRevealIndex(prev => prev + 1);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [revealIndex, rawData, windowStartIndex]);
+
+  // When one full 24-point window is revealed, shift to next window
+  useEffect(() => {
+    if (revealIndex === 47) {
+      const nextStart = (windowStartIndex + 48) % rawData.length;
+      const nextWindow = rawData.slice(nextStart, nextStart + 48);
+
+      // If near the end and not enough points left, wrap around
+      while (nextWindow.length < 48) {
+        nextWindow.push(
+          ...rawData.slice(0, 48 - nextWindow.length)
+        );
+      }
+
+      const reset = nextWindow.map((point, i) => ({
+        time: convertTime(point.time),
+        value: i === 0 ? point.value : null
+      }));
+
+      const timer = setTimeout(() => {
+        setDisplayData(reset);
+        setRevealIndex(1);
+        setWindowStartIndex(nextStart);
+      }, 3000); // small pause before moving to next window
+
+      return () => clearTimeout(timer);
+    }
+  }, [revealIndex, rawData, windowStartIndex]);
+
 
   return (
     <Card className="energy-card">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardTitle>Solar Power</CardTitle>
+        <CardDescription>Amount of Solar Power Captured by the Panel in Real-Time</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={formattedData} margin={{ top: 10, right: 30, left: 0, bottom: 20 }}>
-              <defs>
-                <linearGradient id="colorGrid" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3498DB" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#3498DB" stopOpacity={0.2}/>
-                </linearGradient>
-                <linearGradient id="colorSolar" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#F6B93B" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#F6B93B" stopOpacity={0.2}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="timestamp" 
-                tick={{ fontSize: 12 }} 
-                tickMargin={10}
-                className="text-xs" 
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }} 
-                tickMargin={10}
-                className="text-xs"
-                unit="kW" 
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  border: 'none'
-                }}
-                formatter={(value: number) => [`${value.toFixed(2)} kW`, '']}
-              />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="grid" 
-                name="Grid Power" 
-                stackId="1"
-                stroke="#3498DB" 
-                fillOpacity={1} 
-                fill="url(#colorGrid)" 
-              />
-              <Area 
-                type="monotone" 
-                dataKey="solar" 
-                name="Solar Power" 
-                stackId="1" 
-                stroke="#F6B93B" 
-                fillOpacity={1} 
-                fill="url(#colorSolar)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={displayData}
+          margin={{ top: 20, right: 30, left: 50, bottom: 40 }}
+        >
+          <CartesianGrid stroke="#eee" strokeDasharray="4 4" />
+          <XAxis
+            dataKey="time"
+            tick={{ fill: "#000", fontSize: 12 }}
+            label={{
+              value: "Time of Day",
+              position: "insideBottom",
+              offset: -10,
+              fill: "#000",
+              style: { textAnchor: "middle", fill: "#000", fontSize: 12 }
+            }}
+          />
+          <YAxis
+            tick={{ fill: "#000", fontSize: 12 }}
+            label={{
+              value: "Power (kW)",
+              angle: -90,
+              position: "insideLeft",
+              dx: -10,
+              style: { textAnchor: "middle", fill: "#000", fontSize: 12 }
+            }}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "white",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              fontSize: "0.9rem"
+            }}
+            labelStyle={{ fontWeight: "bold" }}
+            cursor={{ stroke: "#aaa", strokeWidth: 1 }}
+          />
+          <Line
+            type="natural"
+            dataKey="value"
+            stroke="#00b894"
+            strokeWidth={3}
+            dot={{ r: 3, stroke: "#00b894", strokeWidth: 2, fill: "#fff" }}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default EnergyConsumptionChart;

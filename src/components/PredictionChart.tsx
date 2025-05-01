@@ -1,124 +1,172 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { PriceData, SolarForecast } from "@/mock/data";
-import { formatCurrency, hasRealSolarData } from "@/utils/optimizationHelpers";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, CloudSun } from "lucide-react";
 
-interface PredictionChartProps {
-  solarData: SolarForecast[];
-  priceData: PriceData[];
-  title?: string;
-  description?: string;
-  useRealData?: boolean;
+import { useEffect, useState } from "react";
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EnergyData } from "@/mock/data";
+
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
+
+type RawDataPoint = {
+  time: string;
+  value: number;
+};
+
+type ChartDataPoint = {
+  time: string;
+  value: number | null;
+};
+
+export function convertTime(isoString: string): string {
+  const date = new Date(isoString);
+
+  // Convert to local hour in Eastern Time
+  const estHour = new Date(date.toLocaleString("en-US", {
+    timeZone: "America/New_York"
+  })).getHours();
+
+  return estHour.toString().padStart(2, "0") + ":00";
 }
 
-const PredictionChart = ({ 
-  solarData, 
-  priceData, 
-  title = "Energy Forecast", 
-  description = "Predicted solar generation and electricity prices",
-  useRealData = false
-}: PredictionChartProps) => {
-  // Combine the data for the dual-axis chart
-  const combinedData = solarData.map(solar => {
-    const price = priceData.find(p => p.timestamp === solar.timestamp);
-    return {
-      timestamp: solar.timestamp,
-      solarPower: solar.power,
-      price: price ? price.price : 0
-    };
-  });
 
-  // Check if we're using real data from Solcast API
-  const isRealData = useRealData || hasRealSolarData();
+export default function SequentialLiveChart() {
+  const [rawData, setRawData] = useState<RawDataPoint[]>([]);
+  const [windowStartIndex, setWindowStartIndex] = useState(0);
+  const [displayData, setDisplayData] = useState<ChartDataPoint[]>([]);
+  const [revealIndex, setRevealIndex] = useState(1);
+
+  // Load full JSON once
+  useEffect(() => {
+    fetch("/price_data.json")
+      .then(res => res.json())
+      .then((json: RawDataPoint[]) => {
+        setRawData(json);
+        const initialSlice = json.slice(0, 24);
+        const initialized = initialSlice.map((point, i) => ({
+          time: convertTime(point.time),
+          value: i === 0 ? point.value : null
+        }));
+        setDisplayData(initialized);
+        setRevealIndex(1);
+        setWindowStartIndex(0);
+      });
+  }, []);
+
+  // Reveal next point in current window every 2.5s
+  useEffect(() => {
+    if (rawData.length === 0 || revealIndex >= 24) return;
+
+    const timer = setTimeout(() => {
+      setDisplayData(prev =>
+        prev.map((point, i) =>
+          i === revealIndex
+            ? {
+                ...point,
+                value: rawData[windowStartIndex + i].value
+              }
+            : point
+        )
+      );
+      setRevealIndex(prev => prev + 1);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [revealIndex, rawData, windowStartIndex]);
+
+  // When one full 24-point window is revealed, shift to next window
+  useEffect(() => {
+    if (revealIndex === 24) {
+      const nextStart = (windowStartIndex + 24) % rawData.length;
+      const nextWindow = rawData.slice(nextStart, nextStart + 24);
+
+      // If near the end and not enough points left, wrap around
+      while (nextWindow.length < 24) {
+        nextWindow.push(
+          ...rawData.slice(0, 24 - nextWindow.length)
+        );
+      }
+
+      const reset = nextWindow.map((point, i) => ({
+        time: convertTime(point.time),
+        value: i === 0 ? point.value : null
+      }));
+
+      const timer = setTimeout(() => {
+        setDisplayData(reset);
+        setRevealIndex(1);
+        setWindowStartIndex(nextStart);
+      }, 3000); // small pause before moving to next window
+
+      return () => clearTimeout(timer);
+    }
+  }, [revealIndex, rawData, windowStartIndex]);
 
   return (
     <Card className="energy-card">
       <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-          {isRealData && (
-            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 flex items-center">
-              <CloudSun className="h-3 w-3 mr-1" />
-              Solcast Data
-            </Badge>
-          )}
-        </div>
+        <CardTitle>Energy Grid Prices</CardTitle>
+        <CardDescription>Live Energy Grid Prices from Nordpool</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-80 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart 
-              data={combinedData} 
-              margin={{ top: 20, right: 30, left: 0, bottom: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-              <XAxis 
-                dataKey="timestamp" 
-                tick={{ fontSize: 12 }} 
-                tickMargin={10} 
-                className="text-xs"
-              />
-              <YAxis 
-                yAxisId="left"
-                orientation="left" 
-                tick={{ fontSize: 12 }}
-                tickMargin={10}
-                className="text-xs"
-                domain={[0, 'auto']}
-                unit="kW"
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right" 
-                tick={{ fontSize: 12 }}
-                tickMargin={10}
-                className="text-xs"
-                domain={[0, 'auto']}
-                unit="€/kWh"
-              />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  border: 'none'
-                }}
-                formatter={(value: number, name: string) => {
-                  if (name === 'price') return [formatCurrency(value).replace('€', '') + ' €/kWh', 'Price'];
-                  return [`${value.toFixed(2)} kW`, 'Solar Power'];
-                }}
-              />
-              <Legend />
-              <Area
-                yAxisId="left"
-                type="monotone"
-                dataKey="solarPower"
-                name="Solar Power"
-                stroke="#F6B93B"
-                fill="#F6B93B"
-                fillOpacity={0.6}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="price"
-                name="price"
-                stroke="#E74C3C"
-                dot={false}
-                activeDot={{ r: 6 }}
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={displayData}
+          margin={{ top: 20, right: 30, left: 50, bottom: 40 }}
+        >
+          <CartesianGrid stroke="#eee" strokeDasharray="4 4" />
+          <XAxis
+            dataKey="time"
+            tick={{ fill: "#000", fontSize: 12 }}
+            label={{
+              value: "Time of Day",
+              position: "insideBottom",
+              offset: -10,
+              fill: "#000",
+              style: { textAnchor: "middle", fill: "#000", fontSize: 12 }
+            }}
+          />
+          <YAxis
+            tick={{ fill: "#000", fontSize: 12 }}
+            label={{
+              value: "Price ($/kWh)",
+              angle: -90,
+              position: "insideLeft",
+              dx: -10,
+              style: { textAnchor: "middle", fill: "#000", fontSize: 12 }
+            }}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "white",
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              fontSize: "0.9rem"
+            }}
+            labelStyle={{ fontWeight: "bold" }}
+            cursor={{ stroke: "#aaa", strokeWidth: 1 }}
+          />
+          <Line
+            type="natural"
+            dataKey="value"
+            stroke="#ffd300"
+            strokeWidth={3}
+            dot={{ r: 3, stroke: "#fee12b", strokeWidth: 2, fill: "#fff" }}
+            isAnimationActive={false}
+          />
+        </LineChart>
+      </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default PredictionChart;

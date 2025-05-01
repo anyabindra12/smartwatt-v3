@@ -12,7 +12,6 @@ import { optimizeDeviceSchedule, OptimizationResult, UserConstraint, getCurrentS
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { CalendarClock, CheckCircle2, Clock, Database, Zap } from "lucide-react";
-import PredictionChart from "@/components/PredictionChart";
 import UpdateScheduleDialog from "@/components/UpdateScheduleDialog";
 import { Schedule as ScheduleType, Device } from "@/mock/data";
 import OptimizationResultChart from "@/components/OptimizationResultChart";
@@ -259,16 +258,6 @@ const Schedule = () => {
               {showOptimizationChart && currentOptimization && (
                 <OptimizationResultChart optimizationResult={currentOptimization} />
               )}
-              
-              <div className="mt-6">
-                <PredictionChart 
-                  solarData={getCurrentSolarForecast()} 
-                  priceData={electricityPrices} 
-                  title="Energy and Price Forecast"
-                  description="Solar generation and electricity prices for today"
-                  useRealData={hasRealSolarData()}
-                />
-              </div>
             </div>
             
             <div>
