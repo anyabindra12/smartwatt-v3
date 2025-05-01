@@ -270,7 +270,7 @@ const OptimizationReport = () => {
                     yAxisId="right"
                     type="monotone" 
                     dataKey="price" 
-                    name="Electricity Price (€/kWh)" 
+                    name="Electricity Price ($/kWh)" 
                     stroke="#82ca9d" 
                     strokeDasharray="3 3"
                   />
@@ -279,9 +279,9 @@ const OptimizationReport = () => {
                 <BarChart data={timeSeriesData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `€${value.toFixed(2)}`} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value.toFixed(2)}`} />
                   <Tooltip 
-                    formatter={(value) => [`€${Number(value).toFixed(2)}`, "Cost"]}
+                    formatter={(value) => [`$${Number(value).toFixed(2)}`, "Cost"]}
                   />
                   <Legend />
                   <Bar dataKey="originalCost" name="Original Cost" fill="#ff8c00" />

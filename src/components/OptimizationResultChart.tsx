@@ -73,11 +73,11 @@ const OptimizationResultChart = ({ optimizationResult }: OptimizationResultChart
                 tick={{ fontSize: 12 }}
                 tickMargin={10}
                 domain={[0, 'auto']}
-                label={{ value: 'Price (€/kWh)', angle: 90, position: 'insideRight' }}
+                label={{ value: 'Price ($/kWh)', angle: 90, position: 'insideRight' }}
               />
               <Tooltip 
                 formatter={(value: number, name: string) => {
-                  if (name === 'price') return [`€${value.toFixed(2)}/kWh`, 'Price'];
+                  if (name === 'price') return [`$${value.toFixed(2)}/kWh`, 'Price'];
                   if (name === 'originalLoad') return [`${value.toFixed(2)} kWh`, 'Original Load'];
                   if (name === 'optimizedLoad') return [`${value.toFixed(2)} kWh`, 'Optimized Load'];
                   if (name === 'solarProduction') return [`${value.toFixed(2)} kW`, 'Solar Production'];
@@ -127,7 +127,7 @@ const OptimizationResultChart = ({ optimizationResult }: OptimizationResultChart
         </div>
         <div className="mt-4 text-sm text-muted-foreground">
           <p>Recommended operation: {optimizationResult.recommendedStartTime} - {optimizationResult.recommendedEndTime}</p>
-          <p>Estimated savings: €{optimizationResult.estimatedSavings.toFixed(2)}</p>
+          <p>Estimated savings: ${optimizationResult.estimatedSavings.toFixed(2)}</p>
         </div>
       </CardContent>
     </Card>

@@ -235,19 +235,19 @@ const CostAnalysis = ({ defaultTab = "breakdown" }: CostAnalysisProps) => {
                     <LineChart data={costData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `€${value.toFixed(2)}`} />
-                      <Tooltip formatter={(value) => [`€${Number(value).toFixed(2)}`, "Cost"]} />
+                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value.toFixed(2)}`} />
+                      <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, "Cost"]} />
                       <Legend />
-                      <Line type="monotone" dataKey="cost" name="Cost (€)" stroke="#8884d8" strokeWidth={2} />
+                      <Line type="monotone" dataKey="cost" name="Cost ($)" stroke="#8884d8" strokeWidth={2} />
                       <Line type="monotone" dataKey="usage" name="Usage (kWh)" stroke="#82ca9d" strokeWidth={2} />
-                      <Line type="monotone" dataKey="price" name="Price (€/kWh)" stroke="#ffc658" strokeWidth={2} />
+                      <Line type="monotone" dataKey="price" name="Price ($/kWh)" stroke="#ffc658" strokeWidth={2} />
                     </LineChart>
                   ) : (
                     <BarChart data={costData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `€${value.toFixed(2)}`} />
-                      <Tooltip formatter={(value) => [`€${Number(value).toFixed(2)}`, "Cost"]} />
+                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value.toFixed(2)}`} />
+                      <Tooltip formatter={(value) => [`$${Number(value).toFixed(2)}`, "Cost"]} />
                       <Legend />
                       <Bar dataKey="cost" name="Cost" fill="#8884d8" />
                     </BarChart>
@@ -381,7 +381,7 @@ const CostAnalysis = ({ defaultTab = "breakdown" }: CostAnalysisProps) => {
                         margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(value) => `€${value.toFixed(2)}`} />
+                        <XAxis type="number" tick={{ fontSize: 12 }} tickFormatter={(value) => `$${value.toFixed(2)}`} />
                         <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={100} />
                         <Tooltip formatter={(value) => [formatCurrency(value as number), 'Cost']} />
                         <Bar dataKey="cost" name="Monthly Cost" fill="#82ca9d" />

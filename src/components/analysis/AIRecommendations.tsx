@@ -47,7 +47,7 @@ const mockRecommendations: Recommendation[] = [
       "Current charging begins immediately upon plugging in, regardless of electricity rates",
       "Recommend setting charging to start at 02:00 when rates drop by 50%",
       "If charging during the day, optimal time is 11:00-15:00 to utilize solar generation",
-      "Smart charging could save approximately €42.30 per month"
+      "Smart charging could save approximately $42.30 per month"
     ],
     estimatedSavings: 42.30
   },

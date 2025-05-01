@@ -283,7 +283,7 @@ const Schedule = () => {
                                 </p>
                               </div>
                               <div className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 text-xs py-1 px-2 rounded-full">
-                                {result.estimatedSavings.toFixed(2)} € savings
+                                {result.estimatedSavings.toFixed(2)} $ savings
                               </div>
                             </div>
                             <div className="flex justify-between text-xs">
@@ -346,7 +346,7 @@ const Schedule = () => {
                                   <div className="flex justify-between items-center">
                                     <span className="font-medium">Savings:</span>
                                     <span className="text-green-600">
-                                      {schedule.savings ? schedule.savings.toFixed(2) : "0.00"} €
+                                      {schedule.savings ? schedule.savings.toFixed(2) : "0.00"} $
                                     </span>
                                   </div>
                                   <div className="mt-2">
@@ -394,7 +394,7 @@ const Schedule = () => {
                                   <div className="flex justify-between items-center">
                                     <span className="font-medium">Savings:</span>
                                     <span className="text-green-600">
-                                      {device.schedules[0]?.savings ? device.schedules[0].savings.toFixed(2) : "0.00"} €
+                                      {device.schedules[0]?.savings ? device.schedules[0].savings.toFixed(2) : "0.00"} $
                                     </span>
                                   </div>
                                   <div className="mt-2">
